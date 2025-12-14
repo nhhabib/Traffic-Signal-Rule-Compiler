@@ -72,11 +72,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* function prototypes */
 int yylex(void);
 int yyerror(const char *s);
-int hasInput = 0;
 
-#line 80 "y.tab.c"
+/* ---------- GLOBAL STATE ---------- */
+/* Priority flags */
+int emergency = 0;
+
+/* Lane states */
+int lane1 = 0; // 0=STOP, 1=GO
+int lane2 = 0;
+
+/* Queue */
+int queue = 5; // initial vehicles
+
+/* AST printer */
+void ast(const char *parent, const char *child) {
+    printf("AST: (%s -> %s)\n", parent, child);
+}
+
+#line 96 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -126,8 +142,12 @@ extern int yydebug;
     SPEED = 261,                   /* SPEED  */
     NUM = 262,                     /* NUM  */
     GT = 263,                      /* GT  */
-    ID = 264,                      /* ID  */
-    INVALID = 265                  /* INVALID  */
+    VEHICLE = 264,                 /* VEHICLE  */
+    AMBULANCE = 265,               /* AMBULANCE  */
+    NORMAL = 266,                  /* NORMAL  */
+    LANE1 = 267,                   /* LANE1  */
+    LANE2 = 268,                   /* LANE2  */
+    INVALID = 269                  /* INVALID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -142,8 +162,12 @@ extern int yydebug;
 #define SPEED 261
 #define NUM 262
 #define GT 263
-#define ID 264
-#define INVALID 265
+#define VEHICLE 264
+#define AMBULANCE 265
+#define NORMAL 266
+#define LANE1 267
+#define LANE2 268
+#define INVALID 269
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -173,14 +197,19 @@ enum yysymbol_kind_t
   YYSYMBOL_SPEED = 6,                      /* SPEED  */
   YYSYMBOL_NUM = 7,                        /* NUM  */
   YYSYMBOL_GT = 8,                         /* GT  */
-  YYSYMBOL_ID = 9,                         /* ID  */
-  YYSYMBOL_INVALID = 10,                   /* INVALID  */
-  YYSYMBOL_YYACCEPT = 11,                  /* $accept  */
-  YYSYMBOL_input = 12,                     /* input  */
-  YYSYMBOL_rule = 13,                      /* rule  */
-  YYSYMBOL_signal_rule = 14,               /* signal_rule  */
-  YYSYMBOL_speed_rule = 15,                /* speed_rule  */
-  YYSYMBOL_type_error = 16                 /* type_error  */
+  YYSYMBOL_VEHICLE = 9,                    /* VEHICLE  */
+  YYSYMBOL_AMBULANCE = 10,                 /* AMBULANCE  */
+  YYSYMBOL_NORMAL = 11,                    /* NORMAL  */
+  YYSYMBOL_LANE1 = 12,                     /* LANE1  */
+  YYSYMBOL_LANE2 = 13,                     /* LANE2  */
+  YYSYMBOL_INVALID = 14,                   /* INVALID  */
+  YYSYMBOL_YYACCEPT = 15,                  /* $accept  */
+  YYSYMBOL_input = 16,                     /* input  */
+  YYSYMBOL_rule = 17,                      /* rule  */
+  YYSYMBOL_vehicle_rule = 18,              /* vehicle_rule  */
+  YYSYMBOL_signal_rule = 19,               /* signal_rule  */
+  YYSYMBOL_speed_rule = 20,                /* speed_rule  */
+  YYSYMBOL_lane_rule = 21                  /* lane_rule  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -508,19 +537,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   11
+#define YYLAST   13
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  11
+#define YYNTOKENS  15
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  6
+#define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  12
+#define YYNRULES  15
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  15
+#define YYNSTATES  19
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   265
+#define YYMAXUTOK   269
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -560,15 +589,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    16,    16,    20,    24,    25,    26,    31,    32,    33,
-      38,    49,    53
+       0,    34,    34,    36,    40,    41,    42,    43,    48,    53,
+      62,    71,    76,    85,    96,   100
 };
 #endif
 
@@ -585,8 +614,9 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "RED", "GREEN",
-  "YELLOW", "SPEED", "NUM", "GT", "ID", "INVALID", "$accept", "input",
-  "rule", "signal_rule", "speed_rule", "type_error", YY_NULLPTR
+  "YELLOW", "SPEED", "NUM", "GT", "VEHICLE", "AMBULANCE", "NORMAL",
+  "LANE1", "LANE2", "INVALID", "$accept", "input", "rule", "vehicle_rule",
+  "signal_rule", "speed_rule", "lane_rule", YY_NULLPTR
 };
 
 static const char *
@@ -596,7 +626,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-8)
+#define YYPACT_NINF (-10)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -610,8 +640,8 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -8,     0,    -8,    -8,    -8,    -8,    -7,    -8,    -8,    -8,
-      -8,    -8,     2,    -8,    -8
+     -10,     0,   -10,   -10,   -10,   -10,    -1,    -9,   -10,   -10,
+     -10,   -10,   -10,   -10,   -10,     1,   -10,   -10,   -10
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -619,20 +649,20 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       2,     0,     1,     7,     8,     9,     0,    12,     3,     4,
-       5,     6,     0,    10,    11
+       2,     0,     1,    10,    11,    12,     0,     0,    14,    15,
+       3,     6,     4,     5,     7,     0,     8,     9,    13
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    -8,    -8,    -8,    -8
+     -10,   -10,   -10,   -10,   -10,   -10,   -10
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     1,     8,     9,    10,    11
+       0,     1,    10,    11,    12,    13,    14
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -640,36 +670,36 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       2,    12,     0,     3,     4,     5,     6,     0,     0,    13,
-       7,    14
+       2,    16,    17,     3,     4,     5,     6,    15,    18,     7,
+       0,     0,     8,     9
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,     8,    -1,     3,     4,     5,     6,    -1,    -1,     7,
-      10,     9
+       0,    10,    11,     3,     4,     5,     6,     8,     7,     9,
+      -1,    -1,    12,    13
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    12,     0,     3,     4,     5,     6,    10,    13,    14,
-      15,    16,     8,     7,     9
+       0,    16,     0,     3,     4,     5,     6,     9,    12,    13,
+      17,    18,    19,    20,    21,     8,    10,    11,     7
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    11,    12,    12,    13,    13,    13,    14,    14,    14,
-      15,    16,    16
+       0,    15,    16,    16,    17,    17,    17,    17,    18,    18,
+      19,    19,    19,    20,    21,    21
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     0,     2,     1,     1,     1,     1,     1,     1,
-       3,     3,     1
+       0,     2,     0,     2,     1,     1,     1,     1,     2,     2,
+       1,     1,     1,     3,     1,     1
 };
 
 
@@ -1132,65 +1162,92 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* input: %empty  */
-#line 16 "parser.y"
-                  {
-          if (!hasInput)
-              printf("NO RULE PROVIDED\n");
-      }
-#line 1142 "y.tab.c"
-    break;
-
-  case 7: /* signal_rule: RED  */
-#line 31 "parser.y"
-              { hasInput=1; printf("Signal Decision: STOP\n"); }
-#line 1148 "y.tab.c"
-    break;
-
-  case 8: /* signal_rule: GREEN  */
-#line 32 "parser.y"
-              { hasInput=1; printf("Signal Decision: GO\n"); }
-#line 1154 "y.tab.c"
-    break;
-
-  case 9: /* signal_rule: YELLOW  */
-#line 33 "parser.y"
-              { hasInput=1; printf("Signal Decision: WAIT\n"); }
-#line 1160 "y.tab.c"
-    break;
-
-  case 10: /* speed_rule: SPEED GT NUM  */
-#line 38 "parser.y"
-                 {
-        hasInput=1;
-        if (yyvsp[0] > 60)
-            printf("Speed Decision: FINE\n");
-        else
-            printf("Speed Decision: SAFE SPEED\n");
+  case 8: /* vehicle_rule: VEHICLE AMBULANCE  */
+#line 48 "parser.y"
+                      {
+        emergency = 1;
+        ast("vehicle", "ambulance");
+        printf("Priority Rule: Ambulance detected (OVERRIDE ALL)\n");
     }
-#line 1172 "y.tab.c"
+#line 1173 "y.tab.c"
     break;
 
-  case 11: /* type_error: SPEED GT ID  */
-#line 49 "parser.y"
-                {
-        hasInput=1;
-        printf("Type Error: speed must be numeric\n");
-    }
-#line 1181 "y.tab.c"
-    break;
-
-  case 12: /* type_error: INVALID  */
+  case 9: /* vehicle_rule: VEHICLE NORMAL  */
 #line 53 "parser.y"
-            {
-        hasInput=1;
-        printf("Lexical Error: invalid token\n");
+                   {
+        emergency = 0;
+        ast("vehicle", "normal");
+        printf("Vehicle: Normal traffic\n");
     }
-#line 1190 "y.tab.c"
+#line 1183 "y.tab.c"
+    break;
+
+  case 10: /* signal_rule: RED  */
+#line 62 "parser.y"
+        {
+        ast("signal", "RED");
+        if (!emergency) {
+            lane1 = lane2 = 0;
+            printf("Signal: RED → STOP\n");
+        } else {
+            printf("RED ignored due to ambulance priority\n");
+        }
+    }
+#line 1197 "y.tab.c"
+    break;
+
+  case 11: /* signal_rule: GREEN  */
+#line 71 "parser.y"
+          {
+        ast("signal", "GREEN");
+        lane1 = lane2 = 1;
+        printf("Signal: GREEN → GO\n");
+    }
+#line 1207 "y.tab.c"
+    break;
+
+  case 12: /* signal_rule: YELLOW  */
+#line 76 "parser.y"
+           {
+        ast("signal", "YELLOW");
+        lane1 = lane2 = 0;
+        printf("Signal: YELLOW → WAIT\n");
+    }
+#line 1217 "y.tab.c"
+    break;
+
+  case 13: /* speed_rule: SPEED GT NUM  */
+#line 85 "parser.y"
+                 {
+        ast("speed", "check");
+        if (yyvsp[0] > 60)
+            printf("Speed > %d → FINE\n", yyvsp[0]);
+        else
+            printf("Speed OK\n");
+    }
+#line 1229 "y.tab.c"
+    break;
+
+  case 14: /* lane_rule: LANE1  */
+#line 96 "parser.y"
+          {
+        ast("lane", "lane1");
+        printf("Lane-1 status: %s\n", lane1 ? "GO" : "STOP");
+    }
+#line 1238 "y.tab.c"
+    break;
+
+  case 15: /* lane_rule: LANE2  */
+#line 100 "parser.y"
+          {
+        ast("lane", "lane2");
+        printf("Lane-2 status: %s\n", lane2 ? "GO" : "STOP");
+    }
+#line 1247 "y.tab.c"
     break;
 
 
-#line 1194 "y.tab.c"
+#line 1251 "y.tab.c"
 
       default: break;
     }
@@ -1383,12 +1440,26 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 58 "parser.y"
+#line 105 "parser.y"
 
 
+/* ---------- MAIN + SIMULATION (13) ---------- */
 int main() {
     printf("Enter traffic rules (Ctrl+D to finish):\n");
     yyparse();
+
+    printf("\n--- VEHICLE QUEUE SIMULATION ---\n");
+    if (lane1 || lane2) {
+        printf("Initial Queue: %d vehicles\n", queue);
+        queue -= 3;
+        if (queue < 0) queue = 0;
+        printf("Vehicles passed: 3\n");
+        printf("Remaining Queue: %d\n", queue);
+    } else {
+        printf("All lanes STOP → Queue remains: %d\n", queue);
+    }
+
+    printf("--- SIMULATION END ---\n");
     return 0;
 }
 

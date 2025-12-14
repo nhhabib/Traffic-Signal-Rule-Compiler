@@ -60,8 +60,12 @@ extern int yydebug;
     SPEED = 261,                   /* SPEED  */
     NUM = 262,                     /* NUM  */
     GT = 263,                      /* GT  */
-    ID = 264,                      /* ID  */
-    INVALID = 265                  /* INVALID  */
+    VEHICLE = 264,                 /* VEHICLE  */
+    AMBULANCE = 265,               /* AMBULANCE  */
+    NORMAL = 266,                  /* NORMAL  */
+    LANE1 = 267,                   /* LANE1  */
+    LANE2 = 268,                   /* LANE2  */
+    INVALID = 269                  /* INVALID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -76,8 +80,12 @@ extern int yydebug;
 #define SPEED 261
 #define NUM 262
 #define GT 263
-#define ID 264
-#define INVALID 265
+#define VEHICLE 264
+#define AMBULANCE 265
+#define NORMAL 266
+#define LANE1 267
+#define LANE2 268
+#define INVALID 269
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
