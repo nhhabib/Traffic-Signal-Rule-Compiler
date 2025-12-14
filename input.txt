@@ -1,0 +1,8 @@
+traffic
+begin
+signal = red;
+if signal == red then
+print stop;
+else
+print go;
+end
