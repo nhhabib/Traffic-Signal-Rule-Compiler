@@ -4,88 +4,55 @@
 
 int yylex(void);
 int yyerror(const char *s);
-
-/* Symbol Table (simple) */
-void symbol(const char *name) {
-    printf("[Symbol Table] %s\n", name);
-}
+int hasInput = 0;
 %}
 
-/* Tokens */
 %token RED GREEN YELLOW
 %token SPEED NUM GT
-%token TIME DAY NIGHT
-%token VEHICLE AMBULANCE NORMAL
-%token INVALID
+%token ID INVALID
 
 %%
 input:
-      /* empty */
+      /* empty */ {
+          if (!hasInput)
+              printf("NO RULE PROVIDED\n");
+      }
     | input rule
 ;
 
 rule:
       signal_rule
     | speed_rule
-    | time_rule
-    | vehicle_rule
-    | error_rule
+    | type_error
 ;
 
-/* 1️⃣ Signal rules */
+/* Signal rules */
 signal_rule:
-      RED     { symbol("signal"); printf("Signal Decision: STOP\n"); printf("ICG: IF signal==RED GOTO STOP\n"); }
-    | GREEN   { symbol("signal"); printf("Signal Decision: GO\n");   printf("ICG: IF signal==GREEN GOTO GO\n"); }
-    | YELLOW  { symbol("signal"); printf("Signal Decision: WAIT\n"); printf("ICG: IF signal==YELLOW GOTO WAIT\n"); }
+      RED     { hasInput=1; printf("Signal Decision: STOP\n"); }
+    | GREEN   { hasInput=1; printf("Signal Decision: GO\n"); }
+    | YELLOW  { hasInput=1; printf("Signal Decision: WAIT\n"); }
 ;
 
-/* 2️⃣ Speed rule */
+/* Speed rule (correct) */
 speed_rule:
     SPEED GT NUM {
-        symbol("speed");
-        if ($3 > 60) {
+        hasInput=1;
+        if ($3 > 60)
             printf("Speed Decision: FINE\n");
-            printf("ICG: IF speed>60 GOTO FINE\n");
-        } else {
+        else
             printf("Speed Decision: SAFE SPEED\n");
-            printf("ICG: IF speed<=60 GOTO SAFE\n");
-        }
-        printf("[Optimization] Constant folding applied\n");
     }
 ;
 
-/* 3️⃣ Time-based rule */
-time_rule:
-    TIME DAY {
-        symbol("time");
-        printf("Time Decision: NORMAL SPEED\n");
-        printf("ICG: IF time==DAY GOTO NORMAL\n");
+/* Type checking */
+type_error:
+    SPEED GT ID {
+        hasInput=1;
+        printf("Type Error: speed must be numeric\n");
     }
-  | TIME NIGHT {
-        symbol("time");
-        printf("Time Decision: SLOW DOWN\n");
-        printf("ICG: IF time==NIGHT GOTO SLOW\n");
-    }
-;
-
-/* 4️⃣ Vehicle rule */
-vehicle_rule:
-    VEHICLE AMBULANCE {
-        symbol("vehicle");
-        printf("Vehicle Decision: PRIORITY ALLOWED\n");
-        printf("ICG: IF vehicle==AMBULANCE GOTO ALLOW\n");
-    }
-  | VEHICLE NORMAL {
-        symbol("vehicle");
-        printf("Vehicle Decision: NORMAL RULES\n");
-        printf("ICG: IF vehicle==NORMAL GOTO CHECK\n");
-    }
-;
-
-/* 5️⃣ Error handling */
-error_rule:
-    INVALID {
-        printf("Error: Invalid input detected\n");
+  | INVALID {
+        hasInput=1;
+        printf("Lexical Error: invalid token\n");
     }
 ;
 %%

@@ -1,7 +1,12 @@
 %{
 #include "y.tab.h"
 #include <stdlib.h>
+#include <string.h>
 %}
+
+/* case insensitive */
+%option noyywrap
+%option caseless
 
 %%
 "red"           return RED;
@@ -11,18 +16,10 @@
 "speed"         return SPEED;
 ">"             return GT;
 
-"time"          return TIME;
-"day"           return DAY;
-"night"         return NIGHT;
-
-"vehicle"       return VEHICLE;
-"ambulance"     return AMBULANCE;
-"normal"        return NORMAL;
-
 [0-9]+          { yylval = atoi(yytext); return NUM; }
+
+[a-zA-Z]+       return ID;
 
 [ \t\n]         ;
 .               return INVALID;
 %%
-
-int yywrap() { return 1; }
