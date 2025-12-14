@@ -18,13 +18,10 @@
 "="             return ASSIGN;
 ";"             return SEMI;
 
-[0-9]+          return NUM;
 [a-zA-Z]+       return ID;
 
 [ \t\n]         ;
 .               ;
 %%
 
-int yywrap() {
-    return 1;
-}
+int yywrap() { return 1; }

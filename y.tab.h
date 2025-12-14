@@ -67,8 +67,7 @@ extern int yydebug;
     ID = 268,                      /* ID  */
     ASSIGN = 269,                  /* ASSIGN  */
     EQ = 270,                      /* EQ  */
-    SEMI = 271,                    /* SEMI  */
-    NUM = 272                      /* NUM  */
+    SEMI = 271                     /* SEMI  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -91,7 +90,6 @@ extern int yydebug;
 #define ASSIGN 269
 #define EQ 270
 #define SEMI 271
-#define NUM 272
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
