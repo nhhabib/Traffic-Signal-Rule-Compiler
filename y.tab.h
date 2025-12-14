@@ -54,20 +54,19 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    TRAFFIC = 258,                 /* TRAFFIC  */
-    BEGINN = 259,                  /* BEGINN  */
-    END = 260,                     /* END  */
-    IF = 261,                      /* IF  */
-    THEN = 262,                    /* THEN  */
-    ELSE = 263,                    /* ELSE  */
-    PRINT = 264,                   /* PRINT  */
-    SIGNAL = 265,                  /* SIGNAL  */
-    RED = 266,                     /* RED  */
-    GREEN = 267,                   /* GREEN  */
-    ID = 268,                      /* ID  */
-    ASSIGN = 269,                  /* ASSIGN  */
-    EQ = 270,                      /* EQ  */
-    SEMI = 271                     /* SEMI  */
+    RED = 258,                     /* RED  */
+    GREEN = 259,                   /* GREEN  */
+    YELLOW = 260,                  /* YELLOW  */
+    SPEED = 261,                   /* SPEED  */
+    NUM = 262,                     /* NUM  */
+    GT = 263,                      /* GT  */
+    TIME = 264,                    /* TIME  */
+    DAY = 265,                     /* DAY  */
+    NIGHT = 266,                   /* NIGHT  */
+    VEHICLE = 267,                 /* VEHICLE  */
+    AMBULANCE = 268,               /* AMBULANCE  */
+    NORMAL = 269,                  /* NORMAL  */
+    INVALID = 270                  /* INVALID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -76,20 +75,19 @@ extern int yydebug;
 #define YYEOF 0
 #define YYerror 256
 #define YYUNDEF 257
-#define TRAFFIC 258
-#define BEGINN 259
-#define END 260
-#define IF 261
-#define THEN 262
-#define ELSE 263
-#define PRINT 264
-#define SIGNAL 265
-#define RED 266
-#define GREEN 267
-#define ID 268
-#define ASSIGN 269
-#define EQ 270
-#define SEMI 271
+#define RED 258
+#define GREEN 259
+#define YELLOW 260
+#define SPEED 261
+#define NUM 262
+#define GT 263
+#define TIME 264
+#define DAY 265
+#define NIGHT 266
+#define VEHICLE 267
+#define AMBULANCE 268
+#define NORMAL 269
+#define INVALID 270
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

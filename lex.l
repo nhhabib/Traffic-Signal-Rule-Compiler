@@ -1,27 +1,28 @@
 %{
 #include "y.tab.h"
+#include <stdlib.h>
 %}
 
 %%
-"traffic"      return TRAFFIC;
-"begin"        return BEGINN;
-"end"          return END;
-"signal"       return SIGNAL;
-"red"          return RED;
-"green"        return GREEN;
-"if"           return IF;
-"then"         return THEN;
-"else"         return ELSE;
-"print"        return PRINT;
+"red"           return RED;
+"green"         return GREEN;
+"yellow"        return YELLOW;
 
-"=="            return EQ;
-"="             return ASSIGN;
-";"             return SEMI;
+"speed"         return SPEED;
+">"             return GT;
 
-[a-zA-Z]+       return ID;
+"time"          return TIME;
+"day"           return DAY;
+"night"         return NIGHT;
+
+"vehicle"       return VEHICLE;
+"ambulance"     return AMBULANCE;
+"normal"        return NORMAL;
+
+[0-9]+          { yylval = atoi(yytext); return NUM; }
 
 [ \t\n]         ;
-.               ;
+.               return INVALID;
 %%
 
 int yywrap() { return 1; }

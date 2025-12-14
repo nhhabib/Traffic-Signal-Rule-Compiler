@@ -70,11 +70,17 @@
 #line 1 "parser.y"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 int yylex(void);
 int yyerror(const char *s);
 
-#line 78 "y.tab.c"
+/* Symbol Table (simple) */
+void symbol(const char *name) {
+    printf("[Symbol Table] %s\n", name);
+}
+
+#line 84 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -118,20 +124,19 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    TRAFFIC = 258,                 /* TRAFFIC  */
-    BEGINN = 259,                  /* BEGINN  */
-    END = 260,                     /* END  */
-    IF = 261,                      /* IF  */
-    THEN = 262,                    /* THEN  */
-    ELSE = 263,                    /* ELSE  */
-    PRINT = 264,                   /* PRINT  */
-    SIGNAL = 265,                  /* SIGNAL  */
-    RED = 266,                     /* RED  */
-    GREEN = 267,                   /* GREEN  */
-    ID = 268,                      /* ID  */
-    ASSIGN = 269,                  /* ASSIGN  */
-    EQ = 270,                      /* EQ  */
-    SEMI = 271                     /* SEMI  */
+    RED = 258,                     /* RED  */
+    GREEN = 259,                   /* GREEN  */
+    YELLOW = 260,                  /* YELLOW  */
+    SPEED = 261,                   /* SPEED  */
+    NUM = 262,                     /* NUM  */
+    GT = 263,                      /* GT  */
+    TIME = 264,                    /* TIME  */
+    DAY = 265,                     /* DAY  */
+    NIGHT = 266,                   /* NIGHT  */
+    VEHICLE = 267,                 /* VEHICLE  */
+    AMBULANCE = 268,               /* AMBULANCE  */
+    NORMAL = 269,                  /* NORMAL  */
+    INVALID = 270                  /* INVALID  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -140,20 +145,19 @@ extern int yydebug;
 #define YYEOF 0
 #define YYerror 256
 #define YYUNDEF 257
-#define TRAFFIC 258
-#define BEGINN 259
-#define END 260
-#define IF 261
-#define THEN 262
-#define ELSE 263
-#define PRINT 264
-#define SIGNAL 265
-#define RED 266
-#define GREEN 267
-#define ID 268
-#define ASSIGN 269
-#define EQ 270
-#define SEMI 271
+#define RED 258
+#define GREEN 259
+#define YELLOW 260
+#define SPEED 261
+#define NUM 262
+#define GT 263
+#define TIME 264
+#define DAY 265
+#define NIGHT 266
+#define VEHICLE 267
+#define AMBULANCE 268
+#define NORMAL 269
+#define INVALID 270
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -177,25 +181,27 @@ enum yysymbol_kind_t
   YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
-  YYSYMBOL_TRAFFIC = 3,                    /* TRAFFIC  */
-  YYSYMBOL_BEGINN = 4,                     /* BEGINN  */
-  YYSYMBOL_END = 5,                        /* END  */
-  YYSYMBOL_IF = 6,                         /* IF  */
-  YYSYMBOL_THEN = 7,                       /* THEN  */
-  YYSYMBOL_ELSE = 8,                       /* ELSE  */
-  YYSYMBOL_PRINT = 9,                      /* PRINT  */
-  YYSYMBOL_SIGNAL = 10,                    /* SIGNAL  */
-  YYSYMBOL_RED = 11,                       /* RED  */
-  YYSYMBOL_GREEN = 12,                     /* GREEN  */
-  YYSYMBOL_ID = 13,                        /* ID  */
-  YYSYMBOL_ASSIGN = 14,                    /* ASSIGN  */
-  YYSYMBOL_EQ = 15,                        /* EQ  */
-  YYSYMBOL_SEMI = 16,                      /* SEMI  */
-  YYSYMBOL_YYACCEPT = 17,                  /* $accept  */
-  YYSYMBOL_program = 18,                   /* program  */
-  YYSYMBOL_statements = 19,                /* statements  */
-  YYSYMBOL_decision = 20,                  /* decision  */
-  YYSYMBOL_21_1 = 21                       /* $@1  */
+  YYSYMBOL_RED = 3,                        /* RED  */
+  YYSYMBOL_GREEN = 4,                      /* GREEN  */
+  YYSYMBOL_YELLOW = 5,                     /* YELLOW  */
+  YYSYMBOL_SPEED = 6,                      /* SPEED  */
+  YYSYMBOL_NUM = 7,                        /* NUM  */
+  YYSYMBOL_GT = 8,                         /* GT  */
+  YYSYMBOL_TIME = 9,                       /* TIME  */
+  YYSYMBOL_DAY = 10,                       /* DAY  */
+  YYSYMBOL_NIGHT = 11,                     /* NIGHT  */
+  YYSYMBOL_VEHICLE = 12,                   /* VEHICLE  */
+  YYSYMBOL_AMBULANCE = 13,                 /* AMBULANCE  */
+  YYSYMBOL_NORMAL = 14,                    /* NORMAL  */
+  YYSYMBOL_INVALID = 15,                   /* INVALID  */
+  YYSYMBOL_YYACCEPT = 16,                  /* $accept  */
+  YYSYMBOL_input = 17,                     /* input  */
+  YYSYMBOL_rule = 18,                      /* rule  */
+  YYSYMBOL_signal_rule = 19,               /* signal_rule  */
+  YYSYMBOL_speed_rule = 20,                /* speed_rule  */
+  YYSYMBOL_time_rule = 21,                 /* time_rule  */
+  YYSYMBOL_vehicle_rule = 22,              /* vehicle_rule  */
+  YYSYMBOL_error_rule = 23                 /* error_rule  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -521,21 +527,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  4
+#define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   27
+#define YYLAST   15
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  17
+#define YYNTOKENS  16
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  5
+#define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  6
+#define YYNRULES  17
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  28
+#define YYNSTATES  22
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   271
+#define YYMAXUTOK   270
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -576,14 +582,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16
+      15
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    14,    14,    20,    21,    25,    25
+       0,    22,    22,    24,    28,    29,    30,    31,    32,    37,
+      38,    39,    44,    59,    64,    73,    78,    87
 };
 #endif
 
@@ -599,10 +606,10 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "\"invalid token\"", "TRAFFIC", "BEGINN",
-  "END", "IF", "THEN", "ELSE", "PRINT", "SIGNAL", "RED", "GREEN", "ID",
-  "ASSIGN", "EQ", "SEMI", "$accept", "program", "statements", "decision",
-  "$@1", YY_NULLPTR
+  "\"end of file\"", "error", "\"invalid token\"", "RED", "GREEN",
+  "YELLOW", "SPEED", "NUM", "GT", "TIME", "DAY", "NIGHT", "VEHICLE",
+  "AMBULANCE", "NORMAL", "INVALID", "$accept", "input", "rule",
+  "signal_rule", "speed_rule", "time_rule", "vehicle_rule", "error_rule", YY_NULLPTR
 };
 
 static const char *
@@ -612,7 +619,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-12)
+#define YYPACT_NINF (-10)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -626,9 +633,9 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -1,     0,     3,    -5,   -12,    -8,     2,   -11,   -12,    -7,
-      -6,     5,     5,    -2,   -12,   -12,    -3,     4,     6,     7,
-       1,     8,   -12,     9,    10,    12,    11,   -12
+     -10,     0,   -10,   -10,   -10,   -10,     2,    -9,    -6,   -10,
+     -10,   -10,   -10,   -10,   -10,   -10,     4,   -10,   -10,   -10,
+     -10,   -10
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -636,21 +643,21 @@ static const yytype_int8 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     0,     0,     0,     2,     0,
-       0,     0,     0,     0,     3,     4,     0,     0,     0,     0,
-       0,     0,     5,     0,     0,     0,     0,     6
+       2,     0,     1,     9,    10,    11,     0,     0,     0,    17,
+       3,     4,     5,     6,     7,     8,     0,    13,    14,    15,
+      16,    12
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,   -12,    14,   -12
+     -10,   -10,   -10,   -10,   -10,   -10,   -10,   -10
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     2,     6,    14,    23
+       0,     1,    10,    11,    12,    13,    14,    15
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -658,37 +665,37 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       9,    10,     1,     4,     3,     5,     7,     8,    16,    11,
-      12,    13,    17,    19,    21,    18,    20,    24,     0,    25,
-       0,     0,     0,     0,    22,    26,    15,    27
+       2,    17,    18,     3,     4,     5,     6,    19,    20,     7,
+      16,    21,     8,     0,     0,     9
 };
 
 static const yytype_int8 yycheck[] =
 {
-      11,    12,     3,     0,     4,    10,    14,     5,    10,    16,
-      16,     6,    15,     7,    13,    11,     9,     8,    -1,     9,
-      -1,    -1,    -1,    -1,    16,    13,    12,    16
+       0,    10,    11,     3,     4,     5,     6,    13,    14,     9,
+       8,     7,    12,    -1,    -1,    15
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    18,     4,     0,    10,    19,    14,     5,    11,
-      12,    16,    16,     6,    20,    20,    10,    15,    11,     7,
-       9,    13,    16,    21,     8,     9,    13,    16
+       0,    17,     0,     3,     4,     5,     6,     9,    12,    15,
+      18,    19,    20,    21,    22,    23,     8,    10,    11,    13,
+      14,     7
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    17,    18,    19,    19,    21,    20
+       0,    16,    17,    17,    18,    18,    18,    18,    18,    19,
+      19,    19,    20,    21,    21,    22,    22,    23
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     4,     5,     5,     0,    13
+       0,     2,     0,     2,     1,     1,     1,     1,     1,     1,
+       1,     1,     3,     2,     2,     2,     2,     1
 };
 
 
@@ -1151,32 +1158,90 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* program: TRAFFIC BEGINN statements END  */
-#line 14 "parser.y"
-                                  {
-        printf("Program finished.\n");
-    }
-#line 1160 "y.tab.c"
+  case 9: /* signal_rule: RED  */
+#line 37 "parser.y"
+              { symbol("signal"); printf("Signal Decision: STOP\n"); printf("ICG: IF signal==RED GOTO STOP\n"); }
+#line 1165 "y.tab.c"
     break;
 
-  case 5: /* $@1: %empty  */
-#line 25 "parser.y"
-                                        {
-        printf("OUTPUT: STOP\n");
-    }
-#line 1168 "y.tab.c"
+  case 10: /* signal_rule: GREEN  */
+#line 38 "parser.y"
+              { symbol("signal"); printf("Signal Decision: GO\n");   printf("ICG: IF signal==GREEN GOTO GO\n"); }
+#line 1171 "y.tab.c"
     break;
 
-  case 6: /* decision: IF SIGNAL EQ RED THEN PRINT ID SEMI $@1 ELSE PRINT ID SEMI  */
-#line 28 "parser.y"
-                       {
-        printf("OUTPUT: GO\n");
+  case 11: /* signal_rule: YELLOW  */
+#line 39 "parser.y"
+              { symbol("signal"); printf("Signal Decision: WAIT\n"); printf("ICG: IF signal==YELLOW GOTO WAIT\n"); }
+#line 1177 "y.tab.c"
+    break;
+
+  case 12: /* speed_rule: SPEED GT NUM  */
+#line 44 "parser.y"
+                 {
+        symbol("speed");
+        if (yyvsp[0] > 60) {
+            printf("Speed Decision: FINE\n");
+            printf("ICG: IF speed>60 GOTO FINE\n");
+        } else {
+            printf("Speed Decision: SAFE SPEED\n");
+            printf("ICG: IF speed<=60 GOTO SAFE\n");
+        }
+        printf("[Optimization] Constant folding applied\n");
     }
-#line 1176 "y.tab.c"
+#line 1193 "y.tab.c"
+    break;
+
+  case 13: /* time_rule: TIME DAY  */
+#line 59 "parser.y"
+             {
+        symbol("time");
+        printf("Time Decision: NORMAL SPEED\n");
+        printf("ICG: IF time==DAY GOTO NORMAL\n");
+    }
+#line 1203 "y.tab.c"
+    break;
+
+  case 14: /* time_rule: TIME NIGHT  */
+#line 64 "parser.y"
+               {
+        symbol("time");
+        printf("Time Decision: SLOW DOWN\n");
+        printf("ICG: IF time==NIGHT GOTO SLOW\n");
+    }
+#line 1213 "y.tab.c"
+    break;
+
+  case 15: /* vehicle_rule: VEHICLE AMBULANCE  */
+#line 73 "parser.y"
+                      {
+        symbol("vehicle");
+        printf("Vehicle Decision: PRIORITY ALLOWED\n");
+        printf("ICG: IF vehicle==AMBULANCE GOTO ALLOW\n");
+    }
+#line 1223 "y.tab.c"
+    break;
+
+  case 16: /* vehicle_rule: VEHICLE NORMAL  */
+#line 78 "parser.y"
+                   {
+        symbol("vehicle");
+        printf("Vehicle Decision: NORMAL RULES\n");
+        printf("ICG: IF vehicle==NORMAL GOTO CHECK\n");
+    }
+#line 1233 "y.tab.c"
+    break;
+
+  case 17: /* error_rule: INVALID  */
+#line 87 "parser.y"
+            {
+        printf("Error: Invalid input detected\n");
+    }
+#line 1241 "y.tab.c"
     break;
 
 
-#line 1180 "y.tab.c"
+#line 1245 "y.tab.c"
 
       default: break;
     }
@@ -1369,11 +1434,11 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 32 "parser.y"
+#line 91 "parser.y"
 
 
 int main() {
-    printf("Enter traffic rule input:\n");
+    printf("Enter traffic rules (Ctrl+D to finish):\n");
     yyparse();
     return 0;
 }
